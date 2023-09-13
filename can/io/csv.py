@@ -110,18 +110,26 @@ class CSVWriter(FileIOMessageWriter):
 
         # Write a header row
         if not append:
-            self.file.write("timestamp,arbitration_id,extended,remote,error,dlc,data\n")
+            self.file.write("Time Stamp,ID,Extended,Dir,Bus,LEN,D1,D2,D3,D4,D5,D6,D7,D8\n")
 
     def on_message_received(self, msg: Message) -> None:
+        msgData = list(msg.data)
         row = ",".join(
             [
-                repr(msg.timestamp),  # cannot use str() here because that is rounding
-                hex(msg.arbitration_id),
-                "1" if msg.is_extended_id else "0",
-                "1" if msg.is_remote_frame else "0",
-                "1" if msg.is_error_frame else "0",
+                str(msg.timestamp).replace('.', ''),  # cannot use str() here because that is rounding
+                hex(msg.arbitration_id)[2:].zfill(8),
+                "true" if msg.is_extended_id else "false",
+                "Rx",
+                str(msg.channel),
                 str(msg.dlc),
-                b64encode(msg.data).decode("utf8"),
+                hex(msgData[0])[2:].zfill(2),
+                hex(msgData[1])[2:].zfill(2),
+                hex(msgData[2])[2:].zfill(2),
+                hex(msgData[3])[2:].zfill(2),
+                hex(msgData[4])[2:].zfill(2),
+                hex(msgData[5])[2:].zfill(2),
+                hex(msgData[6])[2:].zfill(2),
+                hex(msgData[7])[2:].zfill(2),
             ]
         )
         self.file.write(row)
