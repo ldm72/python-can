@@ -114,9 +114,12 @@ class CSVWriter(FileIOMessageWriter):
 
     def on_message_received(self, msg: Message) -> None:
         msgData = list(msg.data)
+        msgDataLen = len(msgData)
+        if msgDataLen < 8:
+            msgData.extend([0] * (8 - msgDataLen))
         row = ",".join(
             [
-                str(msg.timestamp).replace('.', ''),  # cannot use str() here because that is rounding
+                str(msg.timestamp).replace('.', '').ljust(17, '0'),  # cannot use str() here because that is rounding
                 hex(msg.arbitration_id)[2:].zfill(8),
                 "true" if msg.is_extended_id else "false",
                 "Rx",
